@@ -21,7 +21,7 @@ requirements:
   build:
     - python
     - setuptools
-    - nodejs >=6.10.0
+    - nodejs >=8.8,<9.0
     - certifi
     - pycurl
     - packaging
@@ -49,7 +49,7 @@ test:
     # docs
     - colorcet
     - pygments
-    - sphinx <1.6
+    - sphinx >=1.6
     # pyyaml installed by bokeh
     # packaging installed by bokeh
 
@@ -62,8 +62,7 @@ test:
     - mock
     - packaging
     - pandas
-    - pytest >=3.0.2
-    - pytest-catchlog >=1.2.2
+    - pytest >=3.3.0
     - pytest-cov >=1.8.1
     - pytest-selenium >=1.6.0 [unix]
     - pytest-html
@@ -76,7 +75,7 @@ test:
     - numba
     - pillow
     - boto
-    - nodejs >=6.10.0
+    - nodejs >=8.8.0,<9.0
     # pyyaml installed by bokeh
     # jinja2 installed by bokeh
 

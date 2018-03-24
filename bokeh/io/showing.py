@@ -17,7 +17,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 log = logging.getLogger(__name__)
 
-from bokeh.util.api import public, internal ; public, internal
+from bokeh.util.api import general, dev ; general, dev
 
 #-----------------------------------------------------------------------------
 # Imports
@@ -34,12 +34,15 @@ from .saving import save
 from .state import curstate
 
 #-----------------------------------------------------------------------------
-# Public API
+# General API
 #-----------------------------------------------------------------------------
 
-@public((1,0,0))
+@general((1,0,0))
 def show(obj, browser=None, new="tab", notebook_handle=False, notebook_url="localhost:8888"):
     ''' Immediately display a Bokeh object or application.
+
+        :func:`show` may be called multiple times in a single Jupyter notebook
+        cell to display multiple objects. The objects are displayed in order.
 
     Args:
         obj (LayoutDOM or Application) :
@@ -129,7 +132,7 @@ def show(obj, browser=None, new="tab", notebook_handle=False, notebook_url="loca
     return _show_with_state(obj, state, browser, new, notebook_handle=notebook_handle)
 
 #-----------------------------------------------------------------------------
-# Internal API
+# Dev API
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------

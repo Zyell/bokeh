@@ -124,7 +124,7 @@ export class ClientConnection {
       },
       (error) => {
         throw error
-      }
+      },
     )
   }
 
@@ -139,7 +139,7 @@ export class ClientConnection {
       },
       (error) => {
         throw error
-      }
+      },
     )
   }
 
@@ -184,7 +184,7 @@ export class ClientConnection {
         // get errors from the resolve handler above, so see
         // the catch below instead
         throw error
-      }
+      },
     ).catch((error) => {
       if (console.trace != null)
         console.trace(error)
@@ -289,10 +289,10 @@ export class ClientConnection {
 // Returns a promise of a ClientSession
 // The returned promise has a close() method in case you want to close before
 // getting a session; session.close() works too once you have a session.
-export function pull_session(url: string, session_id: string, args_string?: string) {
+export function pull_session(url: string, session_id: string, args_string?: string): Promise<ClientSession> {
   let connection: ClientConnection
 
-  const promise = new Promise((resolve, reject) => {
+  const promise = new Promise<ClientSession>((resolve, reject) => {
     connection = new ClientConnection(url, session_id, args_string,
       (session) => {
         try {
@@ -306,14 +306,14 @@ export function pull_session(url: string, session_id: string, args_string?: stri
       () => {
         // we rely on reject() as a no-op if we already resolved
         reject(new Error("Connection was closed before we successfully pulled a session"))
-      }
+      },
     )
     return connection.connect().then(
       (_) => undefined,
       (error) => {
         logger.error(`Failed to connect to Bokeh server ${error}`)
         throw error
-      }
+      },
     )
   })
 

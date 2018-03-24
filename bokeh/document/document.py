@@ -17,7 +17,7 @@ figure below:
 from __future__ import absolute_import
 
 import logging
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 from collections import defaultdict
 from json import loads
@@ -399,6 +399,26 @@ class Document(object):
                 self.remove_root(r)
         finally:
             self._pop_all_models_freeze()
+
+    def destroy(self, session):
+        self.remove_on_change(session)
+
+        # probably better to implement a destroy protocol on models to
+        # untangle everything, then the collect below might not be needed
+        for m in self._all_models.values():
+            m._document = None
+            del m
+
+        self._roots = []
+        self._all_models = None
+        self._all_models_by_name = None
+        self._theme = None
+        self._template = None
+        self._session_context = None
+        self.delete_modules()
+
+        import gc
+        gc.collect()
 
     def delete_modules(self):
         ''' Clean up after any modules created by this Document when its session is

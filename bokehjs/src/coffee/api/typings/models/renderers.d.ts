@@ -5,7 +5,7 @@ declare namespace Bokeh {
   export interface DataRenderer extends Renderer, IDataRenderer {}
   export interface IDataRenderer extends IRenderer {}
 
-  export var TileRenderer: { new(attributes?: ITileRenderer, options?: ModelOpts): TileRenderer };
+  export const TileRenderer: { new(attributes?: ITileRenderer, options?: ModelOpts): TileRenderer };
   export interface TileRenderer extends DataRenderer, ITileRenderer {}
   export interface ITileRenderer extends IDataRenderer {
     tile_source?: TileSource;
@@ -20,18 +20,7 @@ declare namespace Bokeh {
     render_parents?: boolean;
   }
 
-  export var DynamicImageRenderer: { new(attributes?: IDynamicImageRenderer, options?: ModelOpts): DynamicImageRenderer };
-  export interface DynamicImageRenderer extends DataRenderer, IDynamicImageRenderer {}
-  export interface IDynamicImageRenderer extends IDataRenderer {
-    image_source?: ImageSource;
-
-    alpha?: Percent;
-
-    level?: RenderLevel;
-    render_parents?: boolean;
-  }
-
-  export var GlyphRenderer: { new(attributes?: IGlyphRenderer, options?: ModelOpts): GlyphRenderer };
+  export const GlyphRenderer: { new(attributes?: IGlyphRenderer, options?: ModelOpts): GlyphRenderer };
   export interface GlyphRenderer extends Renderer, IGlyphRenderer {}
   export interface IGlyphRenderer extends IRenderer {
     data_source?: DataSource;

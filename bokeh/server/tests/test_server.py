@@ -143,8 +143,7 @@ def test__lifecycle_hooks():
         def check_done():
             if len(handler.hooks) == 4:
                 server.io_loop.stop()
-        server_load_checker = PeriodicCallback(check_done, 1,
-                                               io_loop=server.io_loop)
+        server_load_checker = PeriodicCallback(check_done, 1)
         server_load_checker.start()
         server.io_loop.start()
         server_load_checker.stop()
@@ -159,6 +158,11 @@ def test__lifecycle_hooks():
         server_session = server.get_session('/', client_session.id)
         server_doc = server_session.document
         assert len(server_doc.roots) == 1
+
+        # we have to capture these here for examination later, since after
+        # the session is closed, doc.roots will be emptied
+        client_hook_list = client_doc.roots[0]
+        server_hook_list = server_doc.roots[0]
 
         client_session.close()
         # expire the session quickly rather than after the
@@ -184,8 +188,6 @@ def test__lifecycle_hooks():
                              "session_destroyed",
                              "server_unloaded"]
 
-    client_hook_list = client_doc.roots[0]
-    server_hook_list = server_doc.roots[0]
     assert handler.load_count == 1
     assert handler.unload_count == 1
     # this is 3 instead of 6 because locked callbacks on destroyed sessions

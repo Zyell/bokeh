@@ -333,7 +333,7 @@ class Image(XYGlyph):
 
     # a canonical order for positional args that can be used for any
     # functions derived from this class
-    _args = ('image', 'x', 'y', 'dw', 'dh', 'dilate')
+    _args = ('image', 'x', 'y', 'dw', 'dh', 'global_alpha', 'dilate')
 
     # a hook to specify any additional kwargs handled by an initializer
     _extra_kws = {
@@ -371,6 +371,11 @@ class Image(XYGlyph):
         That number is fixed by the image itself.
     """)
 
+    global_alpha = Float(1.0, help="""
+    An overall opacity that each image is rendered with (in addition
+    to any alpha values applied explicitly in a color mapper).
+    """)
+
     dilate = Bool(False, help="""
     Whether to always round fractional pixel locations in such a way
     as to make the images bigger.
@@ -397,7 +402,7 @@ class ImageRGBA(XYGlyph):
 
     # a canonical order for positional args that can be used for any
     # functions derived from this class
-    _args = ('image', 'x', 'y', 'dw', 'dh', 'dilate')
+    _args = ('image', 'x', 'y', 'dw', 'dh', 'global_alpha', 'dilate')
 
     image = NumberSpec(help="""
     The arrays of RGBA data for the images.
@@ -425,6 +430,11 @@ class ImageRGBA(XYGlyph):
     .. note::
         This is not the number of pixels that an image is tall.
         That number is fixed by the image itself.
+    """)
+
+    global_alpha = Float(1.0, help="""
+    An overall opacity that each image is rendered with (in addition
+    to any inherent alpha values in the image itself).
     """)
 
     dilate = Bool(False, help="""
@@ -1034,8 +1044,8 @@ class Wedge(XYGlyph):
 
 # XXX: allow `from bokeh.models.glyphs import *`
 from .markers import (Asterisk, Circle, CircleCross, CircleX, Cross, Diamond, DiamondCross,
-                      InvertedTriangle, Marker, Square, SquareCross, SquareX, Triangle, X)
+                      Hex, InvertedTriangle, Marker, Square, SquareCross, SquareX, Triangle, X)
 
 # Fool pyflakes
 (Asterisk, Circle, CircleCross, CircleX, Cross, Diamond, DiamondCross,
-InvertedTriangle, Marker, Square, SquareCross, SquareX, Triangle, X)
+Hex, InvertedTriangle, Marker, Square, SquareCross, SquareX, Triangle, X)

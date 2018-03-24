@@ -1,7 +1,6 @@
 /// <reference types="@types/rbush" />
 /// <reference types="@types/proj4" />
 /// <reference types="@types/sprintf-js" />
-/// <reference types="@types/timezone-js" />
 /// <reference types="@types/hammerjs" />
 
 /// <reference path="./typings/bokeh.d.ts" />
@@ -24,7 +23,6 @@
 /// <reference path="./typings/models/formatters.d.ts" />
 /// <reference path="./typings/models/glyphs.d.ts" />
 /// <reference path="./typings/models/grids.d.ts" />
-/// <reference path="./typings/models/images.d.ts" />
 /// <reference path="./typings/models/layouts.d.ts" />
 /// <reference path="./typings/models/map_plots.d.ts" />
 /// <reference path="./typings/models/mappers.d.ts" />

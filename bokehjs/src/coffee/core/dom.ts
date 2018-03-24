@@ -3,8 +3,9 @@ import {isBoolean, isString, isArray, isObject} from "./util/types"
 export type HTMLAttrs = { [name: string]: any }
 export type HTMLChild = string | HTMLElement | (string | HTMLElement)[]
 
-const _createElement = (tag: string) => (attrs: HTMLAttrs = {}, ...children: HTMLChild[]): HTMLElement => {
-  const element: HTMLElement = document.createElement(tag)
+const _createElement = <T extends keyof HTMLElementTagNameMap>(tag: T) =>
+    (attrs: HTMLAttrs = {}, ...children: HTMLChild[]): HTMLElementTagNameMap[T] => {
+  const element = document.createElement(tag)
 
   for (const attr in attrs) {
     const value = attrs[attr]
@@ -56,7 +57,8 @@ const _createElement = (tag: string) => (attrs: HTMLAttrs = {}, ...children: HTM
   return element
 }
 
-export function createElement(tag: string, attrs: HTMLAttrs, ...children: HTMLChild[]): HTMLElement {
+export function createElement<T extends keyof HTMLElementTagNameMap>(tag: T,
+     attrs: HTMLAttrs, ...children: HTMLChild[]): HTMLElementTagNameMap[T] {
   return _createElement(tag)(attrs, ...children)
 }
 
@@ -67,6 +69,7 @@ export const
   style    = _createElement("style"),
   a        = _createElement("a"),
   p        = _createElement("p"),
+  i        = _createElement("i"),
   pre      = _createElement("pre"),
   button   = _createElement("button"),
   label    = _createElement("label"),
@@ -74,6 +77,7 @@ export const
   select   = _createElement("select"),
   option   = _createElement("option"),
   optgroup = _createElement("optgroup"),
+  textarea = _createElement("textarea"),
   canvas   = _createElement("canvas"),
   ul       = _createElement("ul"),
   ol       = _createElement("ol"),
@@ -96,7 +100,7 @@ export function replaceWith(element: HTMLElement, replacement: HTMLElement): voi
 }
 
 
-export function prepend(element: HTMLElement, ...nodes: HTMLElement[]): void {
+export function prepend(element: HTMLElement, ...nodes: Node[]): void {
   const first = element.firstChild
   for (const node of nodes) {
     element.insertBefore(node, first)
@@ -150,12 +154,38 @@ export function parent(el: HTMLElement, selector: string): HTMLElement | null {
   return null
 }
 
+export type Sizing = {top: number, bottom: number, left: number, right: number}
+
+export function margin(el: HTMLElement): Sizing {
+  const style = getComputedStyle(el)
+  return {
+    top:    parseFloat(style.marginTop!)    || 0,
+    bottom: parseFloat(style.marginBottom!) || 0,
+    left:   parseFloat(style.marginLeft!)   || 0,
+    right:  parseFloat(style.marginRight!)  || 0,
+  }
+}
+
+export function padding(el: HTMLElement): Sizing {
+  const style = getComputedStyle(el)
+  return {
+    top:    parseFloat(style.paddingTop!)    || 0,
+    bottom: parseFloat(style.paddingBottom!) || 0,
+    left:   parseFloat(style.paddingLeft!)   || 0,
+    right:  parseFloat(style.paddingRight!)  || 0,
+  }
+}
+
 export enum Keys {
-  Tab      = 9,
-  Enter    = 13,
-  Esc      = 27,
-  PageUp   = 33,
-  PageDown = 34,
-  Up       = 38,
-  Down     = 40,
+  Backspace = 8,
+  Tab       = 9,
+  Enter     = 13,
+  Esc       = 27,
+  PageUp    = 33,
+  PageDown  = 34,
+  Left      = 37,
+  Up        = 38,
+  Right     = 39,
+  Down      = 40,
+  Delete    = 46,
 }

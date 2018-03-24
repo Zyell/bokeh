@@ -25,6 +25,9 @@ export const LineJoin: LineJoin[] = ["miter", "round", "bevel"]
 export type Location = "above" | "below" | "left" | "right"
 export const Location: Location[] = ["above", "below", "left", "right"]
 
+export type LegendClickPolicy = "none" | "hide" | "mute"
+export const LegendClickPolicy: LegendClickPolicy[] = ["none", "hide", "mute"]
+
 export type LegendLocation =
   "top_left"    | "top_center"    | "top_right"    |
   "center_left" | "center"        | "center_right" |
@@ -34,6 +37,9 @@ export const LegendLocation: LegendLocation[] = [
   "center_left", "center",        "center_right",
   "bottom_left", "bottom_center", "bottom_right",
 ]
+
+export type Anchor = LegendLocation
+export const Anchor: Anchor[] = LegendLocation
 
 export type Orientation = "vertical" | "horizontal"
 export const Orientation: Orientation[] = ["vertical", "horizontal"]
@@ -47,8 +53,11 @@ export const RenderLevel: RenderLevel[] = ["image", "underlay", "glyph", "annota
 export type RenderMode = "canvas" | "css"
 export const RenderMode: RenderMode[] = ["canvas", "css"]
 
-export type Side = "left" | "right"
-export const Side: Side[] = ["left", "right"]
+export type Side = "above" | "below" | "left" | "right"
+export const Side: Side[] = ["above", "below", "left", "right"]
+
+export type Place = Side | "center"
+export const Place: Place[] = ["above", "below", "left", "right", "center"]
 
 export type SpatialUnits = "screen" | "data"
 export const SpatialUnits: SpatialUnits[] = ["screen", "data"]
@@ -65,14 +74,32 @@ export const TextAlign: TextAlign[] = ["left", "right", "center"]
 export type TextBaseline = "top" | "middle" | "bottom" | "alphabetic" | "hanging" | "ideographic"
 export const TextBaseline: TextBaseline[] = ["top", "middle", "bottom", "alphabetic", "hanging", "ideographic"]
 
-export type DistributionTypes = "uniform" | "normal"
-export const DistributionTypes: DistributionTypes[] = ["uniform", "normal"]
+export type TooltipAttachment = "horizontal" | "vertical" | "left" | "right" | "above" | "below"
+export const TooltipAttachment: TooltipAttachment[] = ["horizontal", "vertical", "left", "right", "above", "below"]
 
-export type StepModes = "after" | "before" | "center"
-export const StepModes: StepModes[] = ["after", "before", "center"]
+export type Distribution = "uniform" | "normal"
+export const Distribution: Distribution[] = ["uniform", "normal"]
+
+export type StepMode = "after" | "before" | "center"
+export const StepMode: StepMode[] = ["after", "before", "center"]
 
 export type SizingMode = "stretch_both" | "scale_width" | "scale_height" | "scale_both" | "fixed"
 export const SizingMode: SizingMode[] = ["stretch_both", "scale_width", "scale_height", "scale_both", "fixed"]
 
 export type PaddingUnits = "percent" | "absolute"
 export const PaddingUnits: PaddingUnits[] = ["percent", "absolute"]
+
+export type SliderCallbackPolicy = "continuous" | "throttle" | "mouseup"
+export const SliderCallbackPolicy: SliderCallbackPolicy[] = ["continuous", "throttle", "mouseup"]
+
+export type RoundingFunction = "round" | "nearest" | "floor" | "rounddown" | "ceil" | "roundup"
+export const RoundingFunction: RoundingFunction[] = ["round", "nearest", "floor", "rounddown", "ceil", "roundup"]
+
+export type UpdateMode = "replace" | "append"
+export const UpdateMode: UpdateMode[] = ["replace", "append"]
+
+export type HTTPMethod = "POST" | "GET"
+export const HTTPMethod: HTTPMethod[] = ["POST", "GET"]
+
+export type Logo = "normal" | "grey"
+export const Logo: Logo[] = ["normal", "grey"]

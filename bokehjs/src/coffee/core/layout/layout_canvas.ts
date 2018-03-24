@@ -1,13 +1,32 @@
 import {GE, EQ, Variable, Constraint} from "./solver"
 import {HasProps} from "../has_props"
+import {Arrayable} from "../types"
 import {BBox} from "../util/bbox"
 
 export interface ViewTransform {
   compute: (v: number) => number
-  v_compute: (vv: number[] | Float64Array) => Float64Array
+  v_compute: (vv: Arrayable<number>) => Arrayable<number>
 }
 
-export class LayoutCanvas extends HasProps {
+export namespace LayoutCanvas {
+  export interface Attrs extends HasProps.Attrs {}
+
+  export interface Props extends HasProps.Props {}
+}
+
+export interface LayoutCanvas extends LayoutCanvas.Attrs {}
+
+export abstract class LayoutCanvas extends HasProps {
+
+  properties: LayoutCanvas.Props
+
+  constructor(attrs?: Partial<LayoutCanvas.Attrs>) {
+    super(attrs)
+  }
+
+  static initClass(): void {
+    this.prototype.type = "LayoutCanvas"
+  }
 
   _top: Variable
   _left: Variable
@@ -18,8 +37,8 @@ export class LayoutCanvas extends HasProps {
   _hcenter: Variable
   _vcenter: Variable
 
-  initialize(attrs: any, options?: any) {
-    super.initialize(attrs, options)
+  initialize(): void {
+    super.initialize()
     this._top = new Variable(`${this.toString()}.top`)
     this._left = new Variable(`${this.toString()}.left`)
     this._width = new Variable(`${this.toString()}.width`)
@@ -49,6 +68,10 @@ export class LayoutCanvas extends HasProps {
     ]
   }
 
+  get_layoutable_children(): LayoutCanvas[] {
+    return []
+  }
+
   get bbox(): BBox {
     return new BBox({
       x0: this._left.value,  y0: this._top.value,
@@ -56,7 +79,7 @@ export class LayoutCanvas extends HasProps {
     })
   }
 
-  get layout_bbox() {
+  get layout_bbox(): {[key: string]: number} {
     return {
       top: this._top.value,
       left: this._left.value,
@@ -74,7 +97,7 @@ export class LayoutCanvas extends HasProps {
       compute: (x: number): number => {
         return this._left.value + x
       },
-      v_compute: (xx: number[] | Float64Array): Float64Array => {
+      v_compute: (xx: Arrayable<number>): Arrayable<number> => {
         const _xx = new Float64Array(xx.length)
         const left = this._left.value
         for (let i = 0; i < xx.length; i++) {
@@ -90,7 +113,7 @@ export class LayoutCanvas extends HasProps {
       compute: (y: number): number => {
         return this._bottom.value - y
       },
-      v_compute: (yy: number[] | Float64Array): Float64Array => {
+      v_compute: (yy: Arrayable<number>): Arrayable<number> => {
         const _yy = new Float64Array(yy.length)
         const bottom = this._bottom.value
         for (let i = 0; i < yy.length; i++) {
@@ -101,4 +124,4 @@ export class LayoutCanvas extends HasProps {
     }
   }
 }
-LayoutCanvas.prototype.type = "LayoutCanvas"
+LayoutCanvas.initClass()

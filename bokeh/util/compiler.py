@@ -19,7 +19,6 @@ from subprocess import Popen, PIPE
 from ..model import Model
 from ..settings import settings
 from .string import snakify
-from .deprecation import deprecated
 
 _plugin_umd = \
 """\
@@ -191,45 +190,98 @@ def nodejs_compile(code, lang="javascript", file=None):
     return AttrDict(json.loads(output))
 
 class Implementation(object):
+    ''' Base class for representing Bokeh custom model implementations.
 
+    '''
     file = None
 
 class Inline(Implementation):
+    ''' Base class for representing Bokeh custom model implementations that may
+    be given as inline code in some language.
 
+    Args:
+        code (str) :
+            The source code for the implementation
+
+        file (str, optional)
+            A file path to a file containing the source text (default: None)
+
+    '''
     def __init__(self, code, file=None):
         self.code = code
         self.file = file
 
 class CoffeeScript(Inline):
+    ''' An implementation for a Bokeh custom model in CoffeeSript.
+
+    Example:
+
+        .. code-block:: python
+
+            class MyExt(Model):
+                __implementation__ = CoffeeScript(""" <CoffeeScript code> """)
+
+    Note that ``CoffeeScript`` is the default implementation language for
+    custom model implementations. The following is equivalent to example above:
+
+    .. code-block:: python
+
+        class MyExt(Model):
+            __implementation__ == """ <some coffeescript code> """
+
+    '''
 
     @property
     def lang(self):
         return "coffeescript"
 
 class TypeScript(Inline):
+    ''' An implementation for a Bokeh custom model in TypeSript
 
+    Example:
+
+        .. code-block:: python
+
+            class MyExt(Model):
+                __implementation__ = TypeScript(""" <TypeSctipt code> """)
+
+    '''
     @property
     def lang(self):
         return "typescript"
 
 class JavaScript(Inline):
+    ''' An implementation for a Bokeh custom model in JavaSript
 
+    Example:
+
+        .. code-block:: python
+
+            class MyExt(Model):
+                __implementation__ = Javacript(""" <Javactipt code> """)
+
+    '''
     @property
     def lang(self):
         return "javascript"
 
 class Less(Inline):
+    ''' An implementation of a Less CSS style sheet.
 
+    '''
     @property
     def lang(self):
         return "less"
 
 class FromFile(Implementation):
+    ''' A custom model implementation read from a separate source file.
 
+    Args:
+        path (str) :
+            The path to the file containing the extension source code
+
+    '''
     def __init__(self, path):
-        if path.endswith(".tsx"):
-            deprecated((0, 12, 7), "TSX templates", "core/dom APIs")
-
         with io.open(path, encoding="utf-8") as f:
             self.code = f.read()
         self.file = path
@@ -238,7 +290,7 @@ class FromFile(Implementation):
     def lang(self):
         if self.file.endswith(".coffee"):
             return "coffeescript"
-        if self.file.endswith((".ts", ".tsx")):
+        if self.file.endswith(".ts"):
             return "typescript"
         if self.file.endswith(".js"):
             return "javascript"
@@ -246,9 +298,12 @@ class FromFile(Implementation):
             return "less"
 
 #: recognized extensions that can be compiled
-exts = (".coffee", ".ts", ".tsx", ".js", ".css", ".less")
+exts = (".coffee", ".ts", ".js", ".css", ".less")
 
 class CustomModel(object):
+    ''' Represent a custom (user-defined) Bokeh model.
+
+    '''
     def __init__(self, cls):
         self.cls = cls
 

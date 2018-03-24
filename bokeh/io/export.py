@@ -13,11 +13,12 @@
 # Boilerplate
 #-----------------------------------------------------------------------------
 from __future__ import absolute_import, division, print_function, unicode_literals
+from six import raise_from
 
 import logging
 log = logging.getLogger(__name__)
 
-from bokeh.util.api import public, internal ; public, internal
+from bokeh.util.api import general, dev ; general, dev
 
 #-----------------------------------------------------------------------------
 # Imports
@@ -25,6 +26,7 @@ from bokeh.util.api import public, internal ; public, internal
 
 # Standard library imports
 import io
+import signal
 from os.path import abspath, devnull
 from tempfile import NamedTemporaryFile
 from warnings import warn
@@ -42,10 +44,10 @@ from .util import default_filename
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
-# Public API
+# General API
 #-----------------------------------------------------------------------------
 
-@public((1,0,0))
+@general((1,0,0))
 def export_png(obj, filename=None, height=None, width=None, webdriver=None):
     ''' Export the LayoutDOM object or document as a PNG.
 
@@ -90,7 +92,7 @@ def export_png(obj, filename=None, height=None, width=None, webdriver=None):
     return abspath(filename)
 
 
-@public((1,0,0))
+@general((1,0,0))
 def export_svgs(obj, filename=None, height=None, width=None, webdriver=None):
     ''' Export the SVG-enabled plots within a layout. Each plot will result
     in a distinct SVG file.
@@ -148,75 +150,68 @@ def export_svgs(obj, filename=None, height=None, width=None, webdriver=None):
     return filenames
 
 #-----------------------------------------------------------------------------
-# Internal API
+# Dev API
 #-----------------------------------------------------------------------------
 
-@internal((1,0,0))
+@dev((1,0,0))
 def get_screenshot_as_png(obj, driver=None, **kwargs):
     '''
 
     '''
-    webdriver = import_required('selenium.webdriver',
-                                'To use bokeh.io.export_png you need selenium ' +
-                                '("conda install -c bokeh selenium" or "pip install selenium")')
-
     Image = import_required('PIL.Image',
                             'To use bokeh.io.export_png you need pillow ' +
                             '("conda install pillow" or "pip install pillow")')
-    # assert that phantomjs is in path for webdriver
-    detect_phantomjs()
 
-    html_path = save_layout_html(obj, **kwargs)
+    with _tmp_file() as tmp:
+        html_path = tmp.name
 
-    web_driver = driver if driver is not None else webdriver.PhantomJS(service_log_path=devnull)
+        save_layout_html(obj, html_path, **kwargs)
 
-    web_driver.get("file:///" + html_path)
-    web_driver.maximize_window()
+        web_driver = driver if driver is not None else _create_default_webdriver()
+        web_driver.get("file:///" + html_path)
+        web_driver.maximize_window()
 
-    ## resize for PhantomJS compat
-    web_driver.execute_script("document.body.style.width = '100%';")
+        ## resize for PhantomJS compat
+        web_driver.execute_script("document.body.style.width = '100%';")
 
-    wait_until_render_complete(web_driver)
+        wait_until_render_complete(web_driver)
 
-    png = web_driver.get_screenshot_as_png()
+        png = web_driver.get_screenshot_as_png()
 
-    b_rect = web_driver.execute_script(_BOUNDING_RECT_SCRIPT)
+        b_rect = web_driver.execute_script(_BOUNDING_RECT_SCRIPT)
 
-    if driver is None: # only quit webdriver if not passed in as arg
-        web_driver.quit()
+        if driver is None: # only quit webdriver if not passed in as arg
+            terminate_web_driver(web_driver)
 
     image = Image.open(io.BytesIO(png))
     cropped_image = _crop_image(image, **b_rect)
 
     return cropped_image
 
-@internal((1,0,0))
+@dev((1,0,0))
 def get_svgs(obj, driver=None, **kwargs):
     '''
 
     '''
-    webdriver = import_required('selenium.webdriver',
-                                'To use bokeh.io.export_svgs you need selenium ' +
-                                '("conda install -c bokeh selenium" or "pip install selenium")')
-    # assert that phantomjs is in path for webdriver
-    detect_phantomjs()
+    with _tmp_file() as tmp:
+        html_path = tmp.name
 
-    html_path = save_layout_html(obj, **kwargs)
+        save_layout_html(obj, html_path, **kwargs)
 
-    web_driver = driver if driver is not None else webdriver.PhantomJS(service_log_path=devnull)
-    web_driver.get("file:///" + html_path)
+        web_driver = driver if driver is not None else _create_default_webdriver()
+        web_driver.get("file:///" + html_path)
 
-    wait_until_render_complete(web_driver)
+        wait_until_render_complete(web_driver)
 
-    svgs = web_driver.execute_script(_SVG_SCRIPT)
+        svgs = web_driver.execute_script(_SVG_SCRIPT)
 
-    if driver is None: # only quit webdriver if not passed in as arg
-        web_driver.quit()
+        if driver is None: # only quit webdriver if not passed in as arg
+            terminate_web_driver(web_driver)
 
     return svgs
 
-@internal((1,0,0))
-def save_layout_html(obj, resources=INLINE, **kwargs):
+@dev((1,0,0))
+def save_layout_html(obj, html_path, resources=INLINE, **kwargs):
     '''
 
     '''
@@ -233,22 +228,30 @@ def save_layout_html(obj, resources=INLINE, **kwargs):
             obj.plot_height = kwargs.get('height', old_height)
             obj.plot_width = kwargs.get('width', old_width)
 
-    html_path = NamedTemporaryFile(suffix=".html").name
     save(obj, filename=html_path, resources=resources, title="")
 
     if resize:
         obj.plot_height = old_height
         obj.plot_width = old_width
 
-    return html_path
-
-@internal((1,0,0))
+@dev((1,0,0))
 def wait_until_render_complete(driver):
     '''
 
     '''
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.common.exceptions import TimeoutException
+
+    def is_bokeh_loaded(driver):
+        return driver.execute_script('''
+            const b = window.Bokeh;
+            return b && b.documents && b.documents.length > 0;
+        ''')
+
+    try:
+        WebDriverWait(driver, 5, poll_frequency=0.1).until(is_bokeh_loaded)
+    except TimeoutException as e:
+        raise_from(RuntimeError('Bokeh was not loaded in time. Something may have gone wrong.'), e)
 
     driver.execute_script(_WAIT_SCRIPT)
 
@@ -266,6 +269,11 @@ def wait_until_render_complete(driver):
         severe_errors = [l for l in browser_logs if l.get('level') == 'SEVERE']
         if len(severe_errors) > 0:
             log.warn("There were severe browser errors that may have affected your export: {}".format(severe_errors))
+
+@dev((1,0,0))
+def terminate_web_driver(driver):
+    driver.service.process.send_signal(signal.SIGTERM)
+    driver.quit()
 
 #-----------------------------------------------------------------------------
 # Private API
@@ -305,6 +313,17 @@ def _crop_image(image, left=0, top=0, right=0, bottom=0, **kwargs):
 
     '''
     return image.crop((left, top, right, bottom))
+
+def _create_default_webdriver():
+    webdriver = import_required('selenium.webdriver',
+                                'To use bokeh.io image export functions you need selenium ' +
+                                '("conda install -c bokeh selenium" or "pip install selenium")')
+
+    phantomjs_path = detect_phantomjs()
+    return webdriver.PhantomJS(executable_path=phantomjs_path, service_log_path=devnull)
+
+def _tmp_file():
+    return NamedTemporaryFile(suffix=".html")
 
 #-----------------------------------------------------------------------------
 # Code
